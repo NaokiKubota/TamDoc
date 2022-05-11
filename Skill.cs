@@ -79,7 +79,7 @@ public abstract class Skill : MonoBehaviour, ISokudochiKeisan,IDamageKeisan,HitK
     //3:トリック
     public GameObject battleManager;
     public GameObject skillUser;
-    public GameObject[] targetChara = new GameObject[13];
+  
     public int Number{get;set;}
     public BattleManager1 battleManager1;
     public IBasicAction userData;
@@ -87,7 +87,7 @@ public abstract class Skill : MonoBehaviour, ISokudochiKeisan,IDamageKeisan,HitK
   public IBasicAction userData2;
     public MemberCount memberCount;
    //  public IBasicAction[] battleMemberDatas=new IBasicAction[13];
-  
+  public bool seiko{get;set;}
     public List<GameObject> targetList=new List<GameObject>();
     public List<IBasicAction> targetDataList=new List<IBasicAction>();
   
@@ -120,7 +120,7 @@ public abstract class Skill : MonoBehaviour, ISokudochiKeisan,IDamageKeisan,HitK
     {
         get; set;
     }
-
+public int ZokuseiSet{get;set;}
     public int TaishoSet
     {
         get; set;
@@ -236,32 +236,81 @@ public abstract class Skill : MonoBehaviour, ISokudochiKeisan,IDamageKeisan,HitK
     {
         
     }
-    public virtual int SokudochiHontai()
+    public virtual int SokudochiHontai(int speed ,ref IBasicAction userData2,ref StatusHosei statusHosei2)
     {        
-            return userData.SokudochiA(userData.SpdSet);       
+            int speedCopy=speed;
+         if(userData2.sobiWeapon!=null)
+         {
+           speedCopy=userData2.sobiWeapon.AttackHosei(speedCopy,ref userData2, ref statusHosei2);
+         }
+         if(userData2.sobiMainBogu!=null)
+         {
+           speedCopy=userData2.sobiMainBogu.AttackHosei(speedCopy,ref userData,ref statusHosei2);
+         }
+          if(userData2.sobiSubBogu!=null)
+          {
+           speedCopy=userData2.sobiSubBogu.AttackHosei(speedCopy,ref userData,ref statusHosei2);
+          }
+          if(userData2.accessory!=null)
+          {
+           speedCopy=userData2.accessory.AttackHosei(speedCopy,ref userData,ref statusHosei2);
+           }
+           speedCopy=userData2.SokudochiCharaHosei(speedCopy,ref userData2,ref statusHosei2);
+           return speedCopy;
     }
-    
+    public virtual int SokudochiHontai()
+    {
+        return -1-userData2.MemberNumber;
+    }
     public abstract void Hontai();
     
     public virtual void KakushuAttackHosei(int damage, ref IBasicAction userData2,ref StatusHosei statusHosei2)
     {   
          int damageCopy=damage;
+         if(userData2.sobiWeapon!=null)
+         {
            damageCopy=userData2.sobiWeapon.AttackHosei(damageCopy,ref userData2, ref statusHosei2);
+         }
+         if(userData2.sobiMainBogu!=null)
+         {
            damageCopy=userData2.sobiMainBogu.AttackHosei(damageCopy,ref userData,ref statusHosei2);
+         }
+          if(userData2.sobiSubBogu!=null)
+          {
            damageCopy=userData2.sobiSubBogu.AttackHosei(damageCopy,ref userData,ref statusHosei2);
+          }
+          if(userData2.accessory!=null)
+          {
            damageCopy=userData2.accessory.AttackHosei(damageCopy,ref userData,ref statusHosei2);
-           damageCopy=userData2.AttackCharaHosei(damageCopy,ref userData,ref statusHosei2);
+           }
+        bool seiko=userData2.AttackCharaHosei(damageCopy,ref userData,ref statusHosei2);
   
     }
-    public virtual void KakushuDefenceHosei(int damage,ref IBasicAction userData2,ref StatusHosei statusHosei2)
+    public virtual bool KakushuDefenceHosei(int damage,ref IBasicAction userData2,ref StatusHosei statusHosei2)
     {    int damageCopy=damage;
+         if(userData2.sobiWeapon!=null)
+         {
          damageCopy=userData2.sobiWeapon.DeffenceHosei(damageCopy,ref userData2,ref statusHosei2);
+         }
+         if(userData2.sobiMainBogu!=null)
+         {
          damageCopy=userData2.sobiMainBogu.DeffenceHosei(damageCopy,ref userData2,ref statusHosei2);
+         }
+         if(userData2.sobiSubBogu!=null)
+          {
          damageCopy=userData2.sobiSubBogu.DeffenceHosei(damageCopy,ref userData2,ref statusHosei2);
+          }
+           if(userData2.accessory!=null)
+          {
          damageCopy=userData2.accessory.DeffenceHosei(damageCopy,ref userData2,ref statusHosei2);
-         userData2.DeffenceCharaHosei(damageCopy,ref userData2,ref statusHosei2);
-
-       HitCount();   
+          }
+         bool seiko=userData2.DeffenceCharaHosei(damageCopy,ref userData2,ref statusHosei2);
+         if(seiko==false)
+         {
+        return false;
+       
+         }
+       return true;
      }
     public virtual void HitCount()
     {
@@ -295,11 +344,7 @@ public abstract class Skill : MonoBehaviour, ISokudochiKeisan,IDamageKeisan,HitK
         return true;
 
     }*/
-    public virtual bool DamageReceive2(int damage,int type,int taisho)
-    {
-        userData.HpSet = damage;
-        return true;
-    }
+   //技固有のデータ
     public virtual void StatusNumberCopy()
     {
       
@@ -379,49 +424,22 @@ public abstract class Skill : MonoBehaviour, ISokudochiKeisan,IDamageKeisan,HitK
        statusHosei2.wind=StatusList.Status[number].wind;
     
     }
-   /* public void CharaDataCopy()
-    {
-        userData2.userDatasec=userData;
-        userData2.MaxLp=statusHosei.maxLp;
-        userData2.MaxBp=statusHosei.maxBp;
-        userData2.MaxHp=statusHosei.maxHp;
-        userData2.Str=statusHosei.str;
-        userData2.Vit=statusHosei.vit;
-        userData2.Mgc=statusHosei.mgc;
-        userData2.Psy=statusHosei.psy;
-        userData2.Spd=statusHosei.spd;
-        userData2.Anger=statusHosei.anger;
-        userData2.Blind=statusHosei.blind;
-        userData2.Charm=statusHosei.charm;
-        userData2.Confuse=statusHosei.confuse;
-        userData2.Dark=statusHosei.dark;
-        userData2.Death=statusHosei.death;
-        userData2.Earth=statusHosei.earth;
-        userData2.Fear=statusHosei.fear;
-        userData2.Fire=statusHosei.fire;
-        userData2.Light=statusHosei.light1;
-        userData2.Negative=statusHosei.negative;
-        userData2.Paralysis=statusHosei.Paralysis;
-        userData2.Poison=statusHosei.poison;
-        userData2.Purge=statusHosei.purge;
-        userData2.Sleep=statusHosei.sleep;
-        userData2.Stone=statusHosei.stone;
-        userData2.Stun=statusHosei.stun;
-        userData2.Water=statusHosei.water;
-        //userData2.Weakness=userData.Weakness+StatusList.Status[Number].weakness;
-        userData2.Wind=statusHosei.wind;
-        userData2.meichu=statusHosei.meichu;
-        userData2.Type=statusHosei.type;
-        userData2.Taisho=statusHosei.taisho;
-        userData2.tokushu=statusHosei.tokushu;
-    }*/
-    public void Junbi()
-    {
-        userData.BpSet=shohibp;
+   
+    public virtual void Junbi()
+    {   
+        if(userData2 is BattleCharaData battleCharaData)
+        {
+             battleCharaData.BpSet=shohibp;
+        } 
         HitCount();
         StatusNumberCopy();
         StatusDataCopy(Number);
-        //CharaDataCopy();
+        
+    }
+    public virtual void SokudochiJunbi()
+    {
+        userData2=skillUser.GetComponent<IBasicAction>();
+        statusHosei2=userData2.reservedSkill.GetComponent<StatusHosei>();
     }
     }
 
